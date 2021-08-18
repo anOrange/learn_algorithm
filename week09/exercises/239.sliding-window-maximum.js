@@ -1,4 +1,3 @@
-"use strict";
 var Color;
 (function (Color) {
     Color[Color["Red"] = 0] = "Red";
@@ -25,7 +24,6 @@ var RBNode = /** @class */ (function () {
         return "{\"left\":" + this.left.toString() + ",\"right\":" + this.right.toString() + ",\"value\":" + this.value + ",\"color\":\"" + Color[this.color] + "\"}";
     };
     RBNode.prototype.valueOf = function () {
-        console.log('valueOf', this.value);
         return this.value;
     };
     return RBNode;
@@ -141,6 +139,7 @@ var RBTree = /** @class */ (function () {
     RBTree.prototype._fix_insert = function (z) {
         // 三种情况
         while (z.parent.color === Color.Red) {
+            if (z == Nil) return
             if (z.parent.parent.left === z.parent) {
                 var y = z.parent.parent.right;
                 if (y.color === Color.Red) { // 情况1，变颜色
@@ -212,7 +211,7 @@ var RBTree = /** @class */ (function () {
             this._transition(z, y);
             y.color = z.color;
         }
-        if (y_origin_color === Color.Black) {
+        if (y_origin_color === Color.Black && x !== this.nil) {
             this._fix_deleteNode(x);
         }
     };
@@ -239,9 +238,15 @@ var RBTree = /** @class */ (function () {
         }
         return y;
     };
+    RBTree.prototype.getMaxNode = function (y) {
+        while (y.right !== this.nil) {
+            y = y.right;
+        }
+        return y;
+    };
     RBTree.prototype._fix_deleteNode = function (x) {
         while (x.color === Color.Red || x.parent === this.nil) {
-            if (x == Nil) break;
+            if (x === this.nil || x === this.root) return
             if (x.parent.left === x) {
                 var w = x.parent.right;
                 if (w.color === Color.Red) {
@@ -293,53 +298,45 @@ var RBTree = /** @class */ (function () {
         }
         x.color = Color.Black;
     };
-    /**
-     * 打印树
-     */
-    RBTree.prototype.print = function () {
-        PrintFromTopToBottom(this.root, this.nil);
-    };
     return RBTree;
 }());
+
 var Nil = new RBNode(); // 哑节点
 Nil.left = Nil;
 Nil.right = Nil;
 Nil.parent = Nil;
-var L = new RBTree(Nil); // 新建一棵树
-// var TNode = new RBNode();
-L.insert(new RBNode(3));
-L.insert(new RBNode(10));
-L.insert(new RBNode(13));
-L.insert(new RBNode(20));
-L.insert(new RBNode(20));
-L.insert(new RBNode(20));
-L.insert(new RBNode(7));
-L.insert(new RBNode(28));
-L.insert(new RBNode(12));
-var temp = L.insert(new RBNode(21));
-L.deleteNode(temp);
-L.print();
-console.log(L.root.toString());
-function PrintFromTopToBottom(root, nil) {
-    var queue = [];
-    queue.push(root);
-    var result = [];
-    if (root == null) {
-        return result;
+
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number[]}
+ */
+var maxSlidingWindow = function(nums, k) {
+    var L = new RBTree(Nil); // 新建一棵树
+    let queue = []
+    let ans = []
+    for (let i = 0; i < k - 1; i++) {
+        let temp = new RBNode(nums[i])
+        L.insert(temp)
+        queue.push(temp)
     }
-    while (queue.length) {
-        var temp = queue.shift();
-        // console.log()
-        if (temp) {
-            result.push(temp.value);
-            if (temp.left !== nil) {
-                queue.push(temp.left);
-            }
-            if (temp.right !== nil) {
-                queue.push(temp.right);
-            }
+    for (let i = k - 1; i < nums.length; i++) {
+        let temp = new RBNode(nums[i])
+        L.insert(temp)
+        queue.push(temp)
+        if (queue.length > k) {
+            let temp = queue.shift()
+            L.deleteNode(temp)
         }
+        ans.push(L.getMaxNode(L.root).value)
     }
-    console.log(result);
-    return result;
-}
+    return ans
+};
+
+let nums = [1,3,-1,-3,5,3,6,7]
+let k = 3
+// nums = [5,3,4]
+// k = 1
+let result = maxSlidingWindow(nums, k)
+
+console.log(result)
