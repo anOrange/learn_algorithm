@@ -13,21 +13,19 @@
   points.forEach((point, index) => {
       pointTable[point] = index + 1
   })
-  const nums = Array(points.length + 1).fill(0)
+  const nums = Array(points.length * 4).fill(0)
   const tree = new SegmentTree(nums)
   const ans = []
   for (let i = 0; i < positions.length; i++) {
       const left = pointTable[positions[i][0]]
       const right = pointTable[positions[i][0] + positions[i][1]] - 1
-      const height = positions[i][1]
-      console.log(left, right, height)
+      const height = positions[i][1] + tree.Query(left, right)
       if (left == right) {
           tree.Change(left, height)
       } else {
           tree.changeRange(1, left, right, height)
       }
       
-      console.log(tree.a[1])
       ans.push(tree.a[1].max)
   }
   return ans
@@ -67,7 +65,7 @@ this.a[curr].max = Math.max(this.a[curr * 2].max, this.a[curr * 2 + 1].max);
 SegmentTree.prototype.change = function (curr, index, val) {
 // 递归边界：叶子[index, index]
 if (this.a[curr].l == this.a[curr].r) {
-  this.a[curr].max += val;
+  this.a[curr].max = val;
   return;
 }
 this.spread(curr);
@@ -87,23 +85,23 @@ if (l <= this.a[curr].l && r >= this.a[curr].r) return this.a[curr].max;
 this.spread(curr);
 let mid = (this.a[curr].l + this.a[curr].r) >> 1;
 let ans = 0;
-if (l <= mid) ans += this.query(curr * 2, l, r);
-if (r > mid) ans += this.query(curr * 2 + 1, l, r);
+if (l <= mid) ans = this.query(curr * 2, l, r);
+if (r > mid) ans = Math.max(this.query(curr * 2 + 1, l, r), ans);
 return ans;
 }; // 区间修改
 
-SegmentTree.prototype.changeRange = function (curr, l, r, delta) {
+SegmentTree.prototype.changeRange = function (curr, l, r, value) {
 // 完全包含
 if (l <= this.a[curr].l && r >= this.a[curr].r) {
   // 修改这个被完全包含的区间的信息
-  this.a[curr].max += delta; // 子树不改了，有bug，标记一下
-  this.a[curr].mark += delta;
+  this.a[curr].max = value; // 子树不改了，有bug，标记一下
+  this.a[curr].mark = value;
   return;
 }
 this.spread(curr);
 let mid = (this.a[curr].l + this.a[curr].r) >> 1;
-if (l <= mid) this.changeRange(curr * 2, l, r, delta);
-if (r > mid) this.changeRange(curr * 2 + 1, l, r, delta);
+if (l <= mid) this.changeRange(curr * 2, l, r, value);
+if (r > mid) this.changeRange(curr * 2 + 1, l, r, value);
 this.a[curr].max = Math.max(this.a[curr * 2].max, this.a[curr * 2 + 1].max);
 };
 
@@ -111,10 +109,10 @@ this.a[curr].max = Math.max(this.a[curr * 2].max, this.a[curr * 2 + 1].max);
 SegmentTree.prototype.spread = function (curr) {
 if (this.a[curr].mark != 0) {
   // 有bug标记
-  this.a[curr * 2].max += this.a[curr].mark;
-  this.a[curr * 2].mark += this.a[curr].mark;
-  this.a[curr * 2 + 1].max += this.a[curr].mark;
-  this.a[curr * 2 + 1].mark += this.a[curr].mark;
+  this.a[curr * 2].max = this.a[curr].mark;
+  this.a[curr * 2].mark = this.a[curr].mark;
+  this.a[curr * 2 + 1].max = this.a[curr].mark;
+  this.a[curr * 2 + 1].mark = this.a[curr].mark;
   this.a[curr].mark = 0;
 }
 };
