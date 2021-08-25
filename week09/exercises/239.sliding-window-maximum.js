@@ -246,7 +246,7 @@ var RBTree = /** @class */ (function () {
     };
     RBTree.prototype._fix_deleteNode = function (x) {
         while (x.color === Color.Red || x.parent === this.nil) {
-            if (x === this.nil || x === this.root) return
+            if (x === this.nil) return
             if (x.parent.left === x) {
                 var w = x.parent.right;
                 if (w.color === Color.Red) {
@@ -337,6 +337,8 @@ let nums = [1,3,-1,-3,5,3,6,7]
 let k = 3
 // nums = [5,3,4]
 // k = 1
+nums = [1,3,1,2,0,5]
+k = 3
 let result = maxSlidingWindow(nums, k)
 
 console.log(result)
