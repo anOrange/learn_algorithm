@@ -13,7 +13,7 @@
   points.forEach((point, index) => {
       pointTable[point] = index + 1
   })
-  const nums = Array(points.length * 4).fill(0)
+  const nums = Array(points.length + 1).fill(0)
   const tree = new SegmentTree(nums)
   const ans = []
   for (let i = 0; i < positions.length; i++) {
@@ -33,7 +33,7 @@
 
 function SegmentTree (nums) {
 let n = nums.length;
-this.a = [];
+this.a = Array(nums * 4);
 this.build(1, 0, n - 1, nums);
 };
 
