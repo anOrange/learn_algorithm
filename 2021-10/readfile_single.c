@@ -40,27 +40,40 @@ int calcCount(int start, unsigned long chunkLen) {
   const BuffSize = 5120000;
   unsigned char buf[BuffSize] = {"\0"};
   lseek(fd, start, SEEK_SET);
+  u_int64_t a = 0;
+  u_int64_t b = 0;
 
   unsigned long readSize = 0;
   // printf("chunkLen=%ld, readSize=%ld\n", chunkLen, readSize);
   while ((len = read(fd, buf, BuffSize + readSize > chunkLen ? chunkLen - readSize : BuffSize)) && readSize < chunkLen)
   {
-    // printf("%s\nlen=%d\n", buf, len);
     // printf("readSize: %ld\n", readSize);
     
     readSize += len;
     len = len - 13;
     for (int i = 0; i < len; i++) {
-      if (*(buf + i + 6) > 'W' || *(buf + i + 13) > 'W') {
+      if (*(buf + i + 13) > 'W') {
         i += 13;
         continue;
       }
       if (*(u_int64_t *)(buf + i) == p1 && *(u_int64_t *)(buf + i + 6) == p2) {
-        // printf("%s\n i=%d\n", (buf + i), i);
         count++;
         i += 13;
       }
-    }
+      
+      // a = *(u_int64_t *)(buf + i);
+      // b = *(u_int64_t *)(buf + i + 6);
+      // if (a == p1 && b == p2) {
+      //   count++;
+      //   i += 13;
+      // }
+      // else if ((b >> 56) > 'W')
+      // {
+      //   i += 13;
+      //   // printf("+13: $d %c\n", (b >> 56), (b >> 56));
+      // }
+      
+    } 
     
   }
   close(fd);
@@ -68,12 +81,9 @@ int calcCount(int start, unsigned long chunkLen) {
   printf("worldCount=%d\n", count);
 
   end = clock();
-
   diff_time = (double)((end - startTime) / 1000);
 
-  // diff_time = (double)((end-start)/CLOCKS_PER_SEC ) 获得进程自身的运行时间
-
-  printf("start=%d, 用时:%f ", start, diff_time);
+  printf("start=%d, 用时:%f \n", start, diff_time);
   return count;
 }
 
