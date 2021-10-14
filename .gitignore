@@ -108,3 +108,5 @@ dist
 
 #dSYM
 *.dSYM/
+
+res_unsync/
